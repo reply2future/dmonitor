@@ -1,0 +1,67 @@
+{
+  "name": "dmonitor",
+  "version": "0.0.1",
+  "description": "The monitor of the computer.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "format": "npx standard --fix",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reply2future/dmonitor.git"
+  },
+  "keywords": [
+    "monitor",
+    "electron",
+    "nodejs"
+  ],
+  "author": "feimei.zhan@live.com",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/reply2future/dmonitor/issues"
+  },
+  "homepage": "https://github.com/reply2future/dmonitor#readme",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.63",
+    "@electron-forge/maker-deb": "^6.0.0-beta.63",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.63",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
+    "@electron-forge/maker-zip": "^6.0.0-beta.63",
+    "electron": "^19.0.1",
+    "standard": "^17.0.0"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "dmonitor"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  }
+}
