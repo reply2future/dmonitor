@@ -1,0 +1,25 @@
+allow-uncaught: false
+async-only: false
+bail: false
+check-leaks: false
+color: true
+delay: false
+diff: true
+exit: true # could be expressed as "no-exit: true"
+extension:
+  - 'js'
+forbid-only: false
+forbid-pending: false
+full-trace: false
+growl: false
+inline-diffs: false
+recursive: true
+reporter: 'spec'
+#retries: 1
+slow: 75
+sort: false
+spec: 'test/**/*.test.js' # the positional arguments!
+timeout: 0 # same as "no-timeout: true" or "timeout: 0"
+trace-warnings: true # node flags ok
+ui: 'bdd'
+v8-stack-trace-limit: 100 # V8 flags are prepended with "v8-"
