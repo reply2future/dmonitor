@@ -1,10 +1,16 @@
-const electron = require('electron')
 const path = require('path')
-const { app, BrowserWindow, Menu } = require('electron')
+const { Monitor } = require('./monitor')
+const { app, BrowserWindow, Menu, Notification } = require('electron')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the javascript object is garbage collected.
 let mainWindow
+const monitor = new Monitor({
+  // windowSize: 10,
+  alertCallback: ({ pid, stat }) => {
+    new Notification({ title: 'ooops', body: `There is some process draining the battery fast, pid is ${pid}` }).show()
+  }
+})
 
 function createWindow () {
   // Create the browser window.
@@ -21,18 +27,20 @@ function createWindow () {
 
   const applicationMenu = [
     {
-      label: 'menu1',
+      label: 'Action',
       submenu: [
         {
-          label: 'Undo',
-          accelerator: 'CmdOrCtrl+Z',
-          role: 'undo'
+          label: 'Start',
+          accelerator: 'CmdOrCtrl+S',
+          click: () => {
+            monitor.start()
+          }
         },
         {
-          label: 'Open',
-          accelerator: 'CmdOrCtrl+O',
+          label: 'Stop',
+          accelerator: 'CmdOrCtrl+P',
           click: () => {
-            electron.dialog.showOpenDialog({ properties: ['openFile', 'openDirectory', 'multiSelections'] })
+            monitor.stop()
           }
         },
         {
