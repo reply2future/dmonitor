@@ -1,14 +1,15 @@
 {
   "name": "dmonitor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "The monitor of the computer.",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron .",
     "format": "npx standard --fix",
     "test": "npx mocha test",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
   },
   "standard": {
     "env": [
@@ -30,49 +31,27 @@
     "url": "https://github.com/reply2future/dmonitor/issues"
   },
   "homepage": "https://github.com/reply2future/dmonitor#readme",
+  "build": {
+    "appId": "com.reply2future.dmonitor",
+    "mac": {
+      "category": "utilities",
+      "icon": "asserts/icon.png",
+      "extendInfo": {
+        "LSUIElement": 1
+      }
+    }
+  },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.63",
-    "@electron-forge/maker-deb": "^6.0.0-beta.63",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.63",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
-    "@electron-forge/maker-zip": "^6.0.0-beta.63",
     "chai": "^4.3.6",
     "electron": "^19.0.1",
+    "electron-builder": "^23.0.3",
     "mocha": "^10.0.0",
     "proxyquire": "^2.1.3",
     "sinon": "^14.0.0",
     "standard": "^17.0.0"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
     "pidtree": "^0.5.0",
     "pidusage": "^3.0.0"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "dmonitor"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
   }
 }
