@@ -1,0 +1,22 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Electron Main",
+			"program": "${workspaceFolder}/main.js",
+			"request": "launch",
+			"runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+			"windows": {
+				"runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
+			},
+			"args": [
+				"."
+			],
+			"outputCapture": "std",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "node"
+		}
+	]
+}
