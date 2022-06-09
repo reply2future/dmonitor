@@ -16,6 +16,7 @@ const monitor = new Monitor({
       type: 'normal',
       isPid: true,
       id: pid,
+      before: [QUIT_ID],
       click: () => {
         process.kill(pid)
         cachedMenus = cachedMenus.filter(item => item.id !== pid)
@@ -32,6 +33,7 @@ let cachedMenus
 let menuTray
 
 const STATUS_ID = 'status'
+const QUIT_ID = 'quit'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
 
@@ -41,26 +43,29 @@ function initMenuBar () {
 
   cachedMenus = [
     {
-      label: 'Action',
-      submenu: [
-        {
-          label: 'Start',
-          accelerator: 'CmdOrCtrl+S',
-          click: () => {
-            monitor.start()
-          }
-        },
-        {
-          label: 'Stop',
-          accelerator: 'CmdOrCtrl+P',
-          click: () => {
-            monitor.stop()
-          }
-        }
-      ]
+      label: 'Current Status',
+      enabled: false
+    },
+    {
+      label: '    on',
+      accelerator: 'CmdOrCtrl+S',
+      type: 'radio',
+      click: () => {
+        monitor.start()
+      }
+    },
+    {
+      label: '    off',
+      type: 'radio',
+      checked: true,
+      accelerator: 'CmdOrCtrl+P',
+      click: () => {
+        monitor.stop()
+      }
     },
     { type: 'separator' },
-    { label: STATUS_NO_PID_LABEL, type: 'normal', id: STATUS_ID }
+    { label: STATUS_NO_PID_LABEL, type: 'normal', id: STATUS_ID },
+    { label: 'Quit', role: 'quit', id: QUIT_ID }
   ]
 
   menuTray.setToolTip('dmonitor!')
