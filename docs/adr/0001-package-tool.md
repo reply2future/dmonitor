@@ -8,6 +8,8 @@ Date: 2022-06-08
 
 2022-06-08 accepted
 
+2022-06-09 done
+
 ## Context
 
 There are two famous package tool `electron builder` and `electron forge`.
