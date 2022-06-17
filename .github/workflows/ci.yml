@@ -41,7 +41,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
-    name: Build image and pull to dockerhub
+    name: Build and release the electron app
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
