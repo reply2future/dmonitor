@@ -2,45 +2,38 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
 
   code-review:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node: [ '12', '14', '16' ]
-    name: Node ${{ matrix.node }} code-review
+    name: Node 16 code-review
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 16
       - run: npm install
       - run: npx standard  
 
   unit-test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node: [ '12', '14', '16' ]
-    name: Node ${{ matrix.node }} unit-test
+    name: Node 16 unit-test
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 16
       - run: npm install
       - run: npm test
       
   build:
-    needs: unit-test
     if: startsWith(github.ref, 'refs/tags/v') 
     runs-on: ${{ matrix.os }}
 
@@ -48,7 +41,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
-    name: Build image and pull to dockerhub
+    name: Build and release the electron app
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
