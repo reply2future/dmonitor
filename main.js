@@ -41,6 +41,7 @@ let menuTray
 
 const STATUS_ID = 'status'
 const QUIT_ID = 'quit'
+const ON_ID = 'on'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
 const DEFAULT_SILENT_TIME = 60 * 60 * 1000
@@ -58,6 +59,7 @@ function initMenuBar () {
     },
     {
       label: '    on',
+      id: ON_ID,
       accelerator: 'CmdOrCtrl+S',
       type: 'radio',
       click: () => {
@@ -82,7 +84,14 @@ function initMenuBar () {
       click: () => {
         clearTimeout(silentTimeoutId)
         monitor.stop()
-        silentTimeoutId = setTimeout(() => monitor.start(), DEFAULT_SILENT_TIME)
+        silentTimeoutId = setTimeout(() => {
+          monitor.start()
+          cachedMenus.filter(item => item.type === 'radio').forEach(item => {
+            if (item.id === ON_ID) item.checked = true
+            else delete item.checked
+          })
+          menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
+        }, DEFAULT_SILENT_TIME)
       }
     },
     { type: 'separator' },
