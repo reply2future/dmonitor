@@ -1,11 +1,17 @@
 const path = require('path')
 const { Monitor } = require('./monitor')
 const { app, Menu, Notification, Tray, nativeImage } = require('electron')
+const { isDev } = require('./tool')
+const logger = require('electron-log')
+
+const monitorConfig = isDev() ? { windowSize: 10 } : {}
 
 const monitor = new Monitor({
+  ...monitorConfig,
   alertCallback: ({ pid, stat }) => {
     if (cachedMenus.find(item => item.id === pid)) return
 
+    logger.warn(`pid: ${pid} drains the battery fast`)
     new Notification({ title: 'ooops', body: `There is some process draining the battery fast, pid is ${pid}` }).show()
 
     const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
@@ -19,6 +25,7 @@ const monitor = new Monitor({
       before: [QUIT_ID],
       click: () => {
         process.kill(pid)
+        logger.info(`sent SIGTERM to pid ${pid}`)
         cachedMenus = cachedMenus.filter(item => item.id !== pid)
         const hasPid = cachedMenus.some(item => item.isPid)
         if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
@@ -74,4 +81,14 @@ function initMenuBar () {
 
 // This method will be called when Electron has done everything
 // initialization and ready for creating menu bar.
-app.whenReady().then(initMenuBar)
+app.whenReady()
+  .then(() => {
+    logger.info('It\'s time to initialize')
+  })
+  .then(initMenuBar)
+  .then(() => {
+    logger.info('initialized')
+  })
+  .catch(error => {
+    logger.error(`Failed to initialize: ${error.message}`)
+  })
