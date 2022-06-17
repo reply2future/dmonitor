@@ -1,6 +1,6 @@
 {
   "name": "dmonitor",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "The monitor of the computer.",
   "main": "main.js",
   "scripts": {
