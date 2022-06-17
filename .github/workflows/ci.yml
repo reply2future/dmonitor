@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+
+  code-review:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [ '12', '14', '16' ]
+    name: Node ${{ matrix.node }} code-review
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npx standard  
+
+  unit-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [ '12', '14', '16' ]
+    name: Node ${{ matrix.node }} unit-test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm test
+      
+  build:
+    needs: unit-test
+    if: startsWith(github.ref, 'refs/tags/v') 
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    name: Build image and pull to dockerhub
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
+
+          # release the app after building
+          release: true
