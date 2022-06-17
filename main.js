@@ -43,6 +43,9 @@ const STATUS_ID = 'status'
 const QUIT_ID = 'quit'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
+const DEFAULT_SILENT_TIME = 60 * 60 * 1000
+
+let silentTimeoutId = null
 
 function initMenuBar () {
   const icon = nativeImage.createFromPath(path.join(__dirname, 'asserts', 'black-icon.png'))
@@ -58,6 +61,7 @@ function initMenuBar () {
       accelerator: 'CmdOrCtrl+S',
       type: 'radio',
       click: () => {
+        clearTimeout(silentTimeoutId)
         monitor.start()
       }
     },
@@ -67,7 +71,18 @@ function initMenuBar () {
       checked: true,
       accelerator: 'CmdOrCtrl+P',
       click: () => {
+        clearTimeout(silentTimeoutId)
         monitor.stop()
+      }
+    },
+    {
+      label: '    silent mode(1 hour)',
+      type: 'radio',
+      accelerator: 'CmdOrCtrl+L',
+      click: () => {
+        clearTimeout(silentTimeoutId)
+        monitor.stop()
+        silentTimeoutId = setTimeout(() => monitor.start(), DEFAULT_SILENT_TIME)
       }
     },
     { type: 'separator' },
