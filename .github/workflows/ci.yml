@@ -38,11 +38,12 @@ jobs:
   build:
     needs: unit-test
     if: startsWith(github.ref, 'refs/tags/v') 
-    runs-on: ${{ matrix.os }}
+    # runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
 
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+    # strategy:
+    #   matrix:
+    #     os: [macos-latest, ubuntu-latest, windows-latest]
 
     name: Build and release the electron app
     steps:
