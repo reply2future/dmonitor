@@ -1,0 +1,22 @@
+{
+    "categories": [
+      {
+        "title": "## 🚀 Features",
+        "labels": ["enhancement","ui"]
+      },
+      {
+        "title": "## 🐛 Fixes",
+        "labels": ["bug"]
+      }
+    ],
+    "ignore_labels": [
+      "ignore"
+    ],
+    "sort": {
+      "order": "ASC",
+      "on_property": "mergedAt"
+    },
+    "base_branches": [
+      "main"
+    ]
+}
