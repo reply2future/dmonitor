@@ -6,20 +6,37 @@ const DEFAULT_INTERVAL_MS = 1000
 const DEFAULT_THRESHOLD = 100
 const DEFAULT_WINDOW_SIZE = 60
 
+const CHANGED_TYPES = {
+  ADD: 'add',
+  REMOVE: 'remove'
+}
+
 class Monitor {
-  constructor ({ intervalMs = DEFAULT_INTERVAL_MS, windowSize = DEFAULT_WINDOW_SIZE, alertCallback }) {
+  constructor ({ intervalMs = DEFAULT_INTERVAL_MS, windowSize = DEFAULT_WINDOW_SIZE, changedCallback }) {
     this.intervalMs = intervalMs
     this.running = false
-    this.alertCallback = alertCallback
+    this.changedCallback = changedCallback
+    this.cachedPid = new Map()
     this.stats = new Statistics({
       windowSize,
       slidingCallback: ({ pid, stat }) => {
-        if (typeof this.alertCallback !== 'function') return
+        if (typeof this.changedCallback !== 'function') return
         const median = this.getMedian(stat.data)
-        if (median < DEFAULT_THRESHOLD) return
-        this.alertCallback({ pid, stat })
-        // prevent multiple alerts
-        this.stats.reset(pid)
+
+        const ret = { pid, stat, type: null }
+        if (median < DEFAULT_THRESHOLD) {
+          if (!this.cachedPid.has(pid)) return
+
+          ret.type = CHANGED_TYPES.REMOVE
+          this.cachedPid.delete(pid)
+        } else {
+          if (this.cachedPid.has(pid)) return
+
+          ret.type = CHANGED_TYPES.ADD
+          this.cachedPid.set(pid)
+        }
+
+        this.changedCallback(ret)
       }
     })
   }
@@ -47,6 +64,10 @@ class Monitor {
 
   async stop () {
     this.running = false
+  }
+
+  isRunning () {
+    return this.running
   }
 
   getMedian (data) {
@@ -89,4 +110,4 @@ class Statistics {
   }
 }
 
-module.exports = { Monitor, Statistics }
+module.exports = { Monitor, Statistics, CHANGED_TYPES }

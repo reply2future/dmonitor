@@ -5,7 +5,7 @@ const proxyquire = require('proxyquire')
 
 const cpus = [110, 120, 130, 50, 112, 130, 0, 0, 10]
 let i = 0
-const { Monitor, Statistics } = proxyquire('../monitor', {
+const { Monitor, Statistics, CHANGED_TYPES } = proxyquire('../monitor', {
   pidtree: async () => [1],
   pidusage: async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
 })
@@ -20,22 +20,35 @@ describe('monitor module', () => {
       clock.restore()
     })
     it('should monitor successfully', async () => {
-      let cbCount = 0
+      let addCbCount = 0
+      let removeCbCount = 0
       const monitor = new Monitor({
-        alertCallback: ({ pid, stat }) => {
-          cbCount += 1
+        changedCallback: ({ pid, stat, type }) => {
+          switch (type) {
+            case CHANGED_TYPES.ADD:
+              addCbCount += 1
+              break
+            case CHANGED_TYPES.REMOVE:
+              removeCbCount += 1
+              break
+            default:
+              break
+          }
         }
       })
       monitor.stats.windowSize = 2
 
       monitor.start()
 
+      monitor.isRunning().should.equal(true)
       await clock.tickAsync(3000)
-      cbCount.should.equal(1)
+      addCbCount.should.equal(1)
+      removeCbCount.should.equal(0)
       await clock.tickAsync(3000)
-      cbCount.should.equal(2)
-
+      addCbCount.should.equal(2)
+      removeCbCount.should.equal(1)
       await monitor.stop()
+      monitor.isRunning().should.equal(false)
     })
   })
 
