@@ -49,7 +49,7 @@ const DEFAULT_SILENT_TIME = 60 * 60 * 1000
 let silentTimeoutId = null
 
 function initMenuBar () {
-  const icon = nativeImage.createFromPath(path.join(__dirname, 'asserts', 'black-icon.png'))
+  const icon = nativeImage.createFromPath(path.join(__dirname, 'asserts', 'BlackIconTemplate.png'))
   menuTray = new Tray(icon)
 
   cachedMenus = [
