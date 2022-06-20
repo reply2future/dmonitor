@@ -6,6 +6,8 @@ Date: 2022-06-20
 
 2022-06-20 proposed
 
+2022-06-20 done
+
 ## Context
 
 As what the title said, it should notify the process to update the ui when process status changed
