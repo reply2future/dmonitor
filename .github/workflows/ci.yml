@@ -64,3 +64,20 @@ jobs:
 
           # release the app after building
           release: true
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          configuration: ".github/workflows/changelog.json"
+
+      - name: Update the release note
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.github_release.outputs.changelog }}
+          allow_override: true
+          name: ${{ github.ref }}
+          prerelease: ${{ endsWith(github.ref, '-pre') }}
+          draft: false
