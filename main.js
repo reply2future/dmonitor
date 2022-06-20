@@ -26,9 +26,11 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
       cachedMenus = cachedMenus.filter(item => item.id !== pid)
       const hasPid = cachedMenus.some(item => item.isPid)
       if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
+      updateStatusItem()
       menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
     }
   })
+  updateStatusItem()
   menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
 }
 
@@ -39,6 +41,7 @@ changedActions[CHANGED_TYPES.REMOVE] = ({ pid, stat }) => {
   const hasPid = cachedMenus.some(item => item.isPid)
   if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
 
+  updateStatusItem()
   menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
 }
 
@@ -52,12 +55,24 @@ const monitor = new Monitor({
   }
 })
 
+function updateStatusItem () {
+  const radios = cachedMenus.filter(item => item.type === 'radio')
+  radios.forEach(item => {
+    if ((monitor.isRunning() && item.id === ON_ID) || (!monitor.isRunning() && item.id === OFF_ID)) {
+      item.checked = true
+    } else {
+      delete item.checked
+    }
+  })
+}
+
 let cachedMenus
 let menuTray
 
 const STATUS_ID = 'status'
 const QUIT_ID = 'quit'
 const ON_ID = 'on'
+const OFF_ID = 'off'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
 const DEFAULT_SILENT_TIME = 60 * 60 * 1000
@@ -85,6 +100,7 @@ function initMenuBar () {
     },
     {
       label: '    off',
+      id: OFF_ID,
       type: 'radio',
       checked: true,
       accelerator: 'CmdOrCtrl+P',
