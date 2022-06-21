@@ -84,7 +84,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          configuration: "changelog.json"
+          configuration: ".github/workflows/changelog.json"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v3
