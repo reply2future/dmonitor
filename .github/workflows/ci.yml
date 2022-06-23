@@ -61,6 +61,7 @@ jobs:
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
+          release: false
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -82,9 +83,10 @@ jobs:
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v3
+        with:
+          configuration: ".github/workflows/changelog.json"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          configuration: ".github/workflows/changelog.json"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v3
