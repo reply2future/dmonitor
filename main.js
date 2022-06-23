@@ -8,21 +8,23 @@ const monitorConfig = isDev() ? { windowSize: 10 } : {}
 
 const changedActions = {}
 changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
-  logger.warn(`pid: ${pid} drains the battery fast`)
-  new Notification({ title: 'ooops', body: `There is some process draining the battery fast, pid is ${pid}` }).show()
+  const command = path.basename(stat.command)
+  logger.warn(`pid: ${pid}, command: ${stat.command} drains the battery fast`)
+  new Notification({ title: 'ooops', body: `The command "${command}" is draining the battery fast and pid is ${pid}` }).show()
 
   const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
   statusItem.label = STATUS_HAS_PID_LABEL
 
   cachedMenus.push({
-    label: `kill ${pid}`,
+    label: `kill ${command} (${pid})`,
+    toolTip: `the path is "${stat.command}"`,
     type: 'normal',
     isPid: true,
     id: pid,
     before: [QUIT_ID],
     click: () => {
       process.kill(pid)
-      logger.info(`sent SIGTERM to pid ${pid}`)
+      logger.info(`sent SIGTERM to command ${stat.command} pid ${pid}`)
       cachedMenus = cachedMenus.filter(item => item.id !== pid)
       const hasPid = cachedMenus.some(item => item.isPid)
       if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
@@ -35,7 +37,7 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
 }
 
 changedActions[CHANGED_TYPES.REMOVE] = ({ pid, stat }) => {
-  logger.warn(`pid: ${pid} becomes normal`)
+  logger.warn(`command: ${stat.command} pid: ${pid} becomes normal`)
   const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
   cachedMenus = cachedMenus.filter(item => item.id !== pid)
   const hasPid = cachedMenus.some(item => item.isPid)

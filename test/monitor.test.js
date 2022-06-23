@@ -7,7 +7,7 @@ const cpus = [110, 120, 130, 50, 112, 130, 0, 0, 10]
 let i = 0
 const { Monitor, Statistics, CHANGED_TYPES } = proxyquire('../monitor', {
   pidtree: async () => [1],
-  pidusage: async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
+  '@reply2future/pidusage': async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
 })
 
 describe('monitor module', () => {
@@ -70,16 +70,18 @@ describe('monitor module', () => {
     })
 
     it('should invoke callback because there is some data greater than threshold', (done) => {
+      const mockStat = { cpu: 110, command: '/bin/bash' }
       const s = new Statistics({
         windowSize: 2,
-        slidingCallback: ({ pid }) => {
+        slidingCallback: ({ pid, stat }) => {
           pid.should.equal(1)
+          stat.command.should.equal(mockStat.command)
           done()
         }
       })
 
-      s.addPidStat(1, { cpu: 110 })
-      s.addPidStat(1, { cpu: 110 })
+      s.addPidStat(1, { ...mockStat })
+      s.addPidStat(1, { ...mockStat })
     })
   })
 })

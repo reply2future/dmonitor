@@ -1,5 +1,5 @@
 const pidtree = require('pidtree')
-const pidusage = require('pidusage')
+const pidusage = require('@reply2future/pidusage')
 
 const ALL_PROCESSES = -1
 const DEFAULT_INTERVAL_MS = 1000
@@ -87,8 +87,10 @@ class Statistics {
   }
 
   addPidStat (pid, stat) {
-    if (!this.map.has(pid)) this.map.set(pid, { sum: 0, data: [] })
+    if (!this.map.has(pid)) this.map.set(pid, { sum: 0, command: stat.command, data: [] })
     const _stat = this.map.get(pid)
+    // duplicated info
+    delete stat.command
     _stat.data.push(stat)
     _stat.sum += stat.cpu
 
@@ -99,10 +101,6 @@ class Statistics {
 
     if (_stat.data.length !== this.windowSize) return
     this.slidingCallback({ pid, stat: _stat })
-  }
-
-  reset (pid) {
-    this.map.set(pid, { sum: 0, data: [] })
   }
 
   clear (pid) {
