@@ -1,6 +1,9 @@
 # dmonitor
 
 [![coverfdd1c0032d416d64.png](https://s8.gifyu.com/images/coverfdd1c0032d416d64.png)](https://gifyu.com/image/SHD1K)
+
+[![codecov](https://codecov.io/gh/reply2future/dmonitor/branch/main/graph/badge.svg?token=FQ2AUS3XTE)](https://codecov.io/gh/reply2future/dmonitor)
+
 It will notify you before the battery is draining too fast like a prophet.
 
 ## How
