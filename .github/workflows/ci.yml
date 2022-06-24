@@ -34,10 +34,8 @@ jobs:
           node-version: 16
       - run: npm install
       - run: npm run coverage
-      - run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov
+      - name: Codecov
+        uses: codecov/codecov-action@v3.1.0
       
   build:
     needs: unit-test
