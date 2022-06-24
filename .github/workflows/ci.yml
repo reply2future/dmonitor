@@ -33,7 +33,11 @@ jobs:
         with:
           node-version: 16
       - run: npm install
-      - run: npm test
+      - run: npm run coverage
+      - run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov
       
   build:
     needs: unit-test
