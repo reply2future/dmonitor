@@ -16,7 +16,8 @@ class Monitor {
     this.intervalMs = intervalMs
     this.running = false
     this.changedCallback = changedCallback
-    this.cachedPid = new Map()
+    this.overThresholdPidCache = new Map()
+    this.windowSize = windowSize
     this.stats = new Statistics({
       windowSize,
       slidingCallback: ({ pid, stat }) => {
@@ -25,18 +26,28 @@ class Monitor {
 
         const ret = { pid, stat, type: null }
         if (median < DEFAULT_THRESHOLD) {
-          if (!this.cachedPid.has(pid)) return
+          if (!this.overThresholdPidCache.has(pid)) return
 
           ret.type = CHANGED_TYPES.REMOVE
-          this.cachedPid.delete(pid)
+          this.overThresholdPidCache.delete(pid)
         } else {
-          if (this.cachedPid.has(pid)) return
+          if (this.overThresholdPidCache.has(pid)) {
+            this.overThresholdPidCache.set(pid, Date.now())
+            return
+          }
 
           ret.type = CHANGED_TYPES.ADD
-          this.cachedPid.set(pid)
+          this.overThresholdPidCache.set(pid, Date.now())
         }
 
         this.changedCallback(ret)
+      }
+    })
+    this.checkTimer = new CheckTimer({
+      intervalMs: this.windowSize * this.intervalMs,
+      cache: this.overThresholdPidCache,
+      cb: ({ pid }) => {
+        this.changedCallback({ pid, type: CHANGED_TYPES.REMOVE })
       }
     })
   }
@@ -60,10 +71,12 @@ class Monitor {
     }
 
     interval(this.intervalMs)
+    this.checkTimer.start()
   }
 
   async stop () {
     this.running = false
+    this.checkTimer.stop()
   }
 
   isRunning () {
@@ -108,4 +121,27 @@ class Statistics {
   }
 }
 
-module.exports = { Monitor, Statistics, CHANGED_TYPES }
+class CheckTimer {
+  constructor ({ intervalMs, cache, cb }) {
+    this.intervalMs = intervalMs
+    this.cache = cache
+    this.cb = cb
+  }
+
+  start () {
+    this.interval = setInterval(() => {
+      this.cache.forEach((v, k) => {
+        if (Date.now() - v < this.intervalMs) return
+
+        this.cache.delete(k)
+        this.cb({ pid: k })
+      })
+    }, this.intervalMs)
+  }
+
+  stop () {
+    clearInterval(this.interval)
+  }
+}
+
+module.exports = { Monitor, Statistics, CheckTimer, CHANGED_TYPES }
