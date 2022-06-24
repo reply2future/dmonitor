@@ -36,8 +36,8 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
   menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
 }
 
-changedActions[CHANGED_TYPES.REMOVE] = ({ pid, stat }) => {
-  logger.warn(`command: ${stat.command} pid: ${pid} becomes normal`)
+changedActions[CHANGED_TYPES.REMOVE] = ({ pid }) => {
+  logger.warn(`pid: ${pid} becomes normal`)
   const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
   cachedMenus = cachedMenus.filter(item => item.id !== pid)
   const hasPid = cachedMenus.some(item => item.isPid)

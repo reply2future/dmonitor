@@ -5,7 +5,7 @@ const proxyquire = require('proxyquire')
 
 const cpus = [110, 120, 130, 50, 112, 130, 0, 0, 10]
 let i = 0
-const { Monitor, Statistics, CHANGED_TYPES } = proxyquire('../monitor', {
+const { Monitor, Statistics, CheckTimer, CHANGED_TYPES } = proxyquire('../monitor', {
   pidtree: async () => [1],
   '@reply2future/pidusage': async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
 })
@@ -82,6 +82,37 @@ describe('monitor module', () => {
 
       s.addPidStat(1, { ...mockStat })
       s.addPidStat(1, { ...mockStat })
+    })
+  })
+
+  describe('checktimer', () => {
+    let clock
+    beforeEach(() => {
+      clock = sinon.useFakeTimers()
+    })
+    afterEach(() => {
+      clock.restore()
+    })
+    it('should invoke callback when time interval is bigger than settings', async () => {
+      const intervalMs = 3000
+      const cache = new Map([
+        ['expired', Date.now()],
+        ['not expired', Date.now() + intervalMs * 3]
+      ])
+      let cbCount = 0
+      const s = new CheckTimer({
+        intervalMs,
+        cache,
+        cb: ({ pid }) => {
+          pid.should.equal('expired')
+          cbCount++
+        }
+      })
+
+      s.start()
+      await clock.tickAsync(4000)
+      cbCount.should.equal(1)
+      s.stop()
     })
   })
 })
