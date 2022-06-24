@@ -8,7 +8,7 @@
     "start:debug": "NODE_ENV=development electron .",
     "format": "npx standard --fix",
     "test": "npx mocha test",
-    "coverage": "nyc npm test --reporter=lcov --reporter=text-summary",
+    "coverage": "nyc npm test --reporter=lcov",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
