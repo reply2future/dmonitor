@@ -6,6 +6,8 @@ Date: 2022-06-24
 
 2022-06-24 proposed
 
+2022-06-24 done
+
 ## Context
 
 [0002-auto-remove-process](./0002-auto-remove-process-id-menu-item-when-it-does-not-meet-the-threshold.md)
