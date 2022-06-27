@@ -1,7 +1,8 @@
 const path = require('path')
 const { Monitor, CHANGED_TYPES } = require('./monitor')
-const { app, Menu, Notification, Tray, nativeImage } = require('electron')
+const { app, Menu, Notification, Tray, nativeImage, BrowserWindow } = require('electron')
 const { isDev } = require('./tool')
+const { store, STORE_KEY } = require('./store')
 const logger = require('electron-log')
 
 const monitorConfig = isDev() ? { windowSize: 10 } : {}
@@ -21,7 +22,7 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
     type: 'normal',
     isPid: true,
     id: pid,
-    before: [QUIT_ID],
+    before: [LAST_SEQ_ID],
     click: () => {
       process.kill(pid)
       logger.info(`sent SIGTERM to command ${stat.command} pid ${pid}`)
@@ -72,14 +73,19 @@ let cachedMenus
 let menuTray
 
 const STATUS_ID = 'status'
-const QUIT_ID = 'quit'
 const ON_ID = 'on'
 const OFF_ID = 'off'
+const SILENT_ID = 'silent'
+const LAST_SEQ_ID = 'lastSeqId'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
-const DEFAULT_SILENT_TIME = 60 * 60 * 1000
+const DEFAULT_SILENT_TIME_HR = 1
 
 let silentTimeoutId = null
+
+function generateSilentTimeLabel () {
+  return `    silent mode(${store.get(STORE_KEY.silentTimeHr, 1)} hour)`
+}
 
 function initMenuBar () {
   const icon = nativeImage.createFromPath(path.join(__dirname, 'asserts', 'BlackIconTemplate.png'))
@@ -112,7 +118,8 @@ function initMenuBar () {
       }
     },
     {
-      label: '    silent mode(1 hour)',
+      label: generateSilentTimeLabel(),
+      id: SILENT_ID,
       type: 'radio',
       accelerator: 'CmdOrCtrl+L',
       click: () => {
@@ -125,12 +132,34 @@ function initMenuBar () {
             else delete item.checked
           })
           menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
-        }, DEFAULT_SILENT_TIME)
+        }, store.get(STORE_KEY.silentTimeHr, DEFAULT_SILENT_TIME_HR) * 3600 * 1000)
       }
     },
     { type: 'separator' },
     { label: STATUS_NO_PID_LABEL, type: 'normal', id: STATUS_ID },
-    { label: 'Quit', role: 'quit', id: QUIT_ID }
+    { type: 'separator', id: LAST_SEQ_ID },
+    {
+      label: 'Preferences',
+      click: () => {
+        const win = new BrowserWindow({
+          width: 800,
+          height: 600,
+          webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+          }
+        })
+        win.loadFile('preference.html')
+        win.on('close', () => {
+          const silentItem = cachedMenus.find(item => item.id === SILENT_ID)
+          silentItem.label = generateSilentTimeLabel()
+          updateStatusItem()
+          menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
+        })
+      }
+    },
+    { label: 'Help', role: 'help' },
+    { type: 'separator' },
+    { label: 'Quit', role: 'quit' }
   ]
 
   menuTray.setToolTip('dmonitor!')
@@ -150,3 +179,7 @@ app.whenReady()
   .catch(error => {
     logger.error(`Failed to initialize: ${error.message}`)
   })
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})
