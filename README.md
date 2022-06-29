@@ -32,6 +32,11 @@ The monitor will collect the cpu usage information, if the median of cpu usage i
 4. open the app and set for [unidentified developer](https://www.macworld.com/article/672947/how-to-open-a-mac-app-from-an-unidentified-developer.html#how-to-open-apps-not-from-mac-app-store)
 5. turn on the monitor in the menu bar
 
+## Development
+
+1. [electron.js](https://www.electronjs.org/)
+2. node.js >= 16
+
 ## Contribute
 
 1. open a issue if it does not exist
