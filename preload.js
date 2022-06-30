@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('api', {
   setStore: (key, value) => {
     store.set(key, value)
     ipcRenderer.send(getIpcStoreKey(key), value)
-  }
+  },
+  getAppInfo: () => store.get(STORE_KEY.appInfo)
 })

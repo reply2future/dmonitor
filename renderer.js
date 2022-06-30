@@ -14,3 +14,6 @@ autoLaunch.addEventListener('change', (event) => {
 })
 
 autoLaunch.checked = window.api.getStore(window.api.STORE_KEY.autoLaunch, false)
+
+const info = document.querySelector('#info')
+info.innerHTML = window.api.getAppInfo()

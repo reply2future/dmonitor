@@ -1,6 +1,6 @@
 const path = require('path')
 const { Monitor, CHANGED_TYPES } = require('./monitor')
-const { app, Menu, Notification, Tray, nativeImage, BrowserWindow, ipcMain } = require('electron')
+const { app, Menu, Notification, Tray, nativeImage, BrowserWindow, ipcMain, shell } = require('electron')
 const { isDev, getIpcStoreKey } = require('./tool')
 const { store, STORE_KEY } = require('./store')
 const logger = require('electron-log')
@@ -157,7 +157,7 @@ function initMenuBar () {
         })
       }
     },
-    { label: 'Help', role: 'help' },
+    { label: 'Help', role: 'help', click: () => shell.openExternal('https://github.com/reply2future/dmonitor/issues') },
     { type: 'separator' },
     { label: 'Quit', role: 'quit' }
   ]
@@ -179,6 +179,7 @@ function initListeners () {
 app.whenReady()
   .then(() => {
     logger.info('It\'s time to initialize')
+    store.set(STORE_KEY.appInfo, `${app.getName()}:${app.getVersion()}`)
   })
   .then(initListeners)
   .then(initMenuBar)
