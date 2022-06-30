@@ -1,7 +1,7 @@
 const path = require('path')
 const { Monitor, CHANGED_TYPES } = require('./monitor')
-const { app, Menu, Notification, Tray, nativeImage, BrowserWindow } = require('electron')
-const { isDev } = require('./tool')
+const { app, Menu, Notification, Tray, nativeImage, BrowserWindow, ipcMain } = require('electron')
+const { isDev, getIpcStoreKey } = require('./tool')
 const { store, STORE_KEY } = require('./store')
 const logger = require('electron-log')
 
@@ -166,12 +166,21 @@ function initMenuBar () {
   menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
 }
 
+function initListeners () {
+  ipcMain.on(getIpcStoreKey(STORE_KEY.autoLaunch), (event, value) => {
+    app.setLoginItemSettings({
+      openAtLogin: value
+    })
+  })
+}
+
 // This method will be called when Electron has done everything
 // initialization and ready for creating menu bar.
 app.whenReady()
   .then(() => {
     logger.info('It\'s time to initialize')
   })
+  .then(initListeners)
   .then(initMenuBar)
   .then(() => {
     logger.info('initialized')

@@ -1,5 +1,6 @@
-const { contextBridge } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 const { store, STORE_KEY } = require('./store')
+const { getIpcStoreKey } = require('./tool')
 
 // Expose protected methods off of window (ie.
 // window.api.sendToA) in order to use ipcRenderer
@@ -7,5 +8,8 @@ const { store, STORE_KEY } = require('./store')
 contextBridge.exposeInMainWorld('api', {
   STORE_KEY,
   getStore: (key, defaultValue) => store.get(key, defaultValue),
-  setStore: (key, value) => store.set(key, value)
+  setStore: (key, value) => {
+    store.set(key, value)
+    ipcRenderer.send(getIpcStoreKey(key), value)
+  }
 })
