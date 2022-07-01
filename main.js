@@ -5,7 +5,7 @@ const { isDev, getIpcStoreKey } = require('./tool')
 const { store, STORE_KEY } = require('./store')
 const logger = require('electron-log')
 
-const monitorConfig = isDev() ? { windowSize: 10 } : {}
+const monitorConfig = isDev() ? { windowSize: 5 } : {}
 
 const changedActions = {}
 changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
@@ -22,7 +22,7 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
     type: 'normal',
     isPid: true,
     id: pid,
-    before: [LAST_SEQ_ID],
+    after: [STATUS_ID],
     click: () => {
       process.kill(pid)
       logger.info(`sent SIGTERM to command ${stat.command} pid ${pid}`)
@@ -76,7 +76,6 @@ const STATUS_ID = 'status'
 const ON_ID = 'on'
 const OFF_ID = 'off'
 const SILENT_ID = 'silent'
-const LAST_SEQ_ID = 'lastSeqId'
 const STATUS_NO_PID_LABEL = 'There is no draining process'
 const STATUS_HAS_PID_LABEL = 'There are some processes draining the battery'
 const DEFAULT_SILENT_TIME_HR = 1
@@ -137,7 +136,7 @@ function initMenuBar () {
     },
     { type: 'separator' },
     { label: STATUS_NO_PID_LABEL, type: 'normal', id: STATUS_ID },
-    { type: 'separator', id: LAST_SEQ_ID },
+    { type: 'separator' },
     {
       label: 'Preferences',
       click: () => {
@@ -159,7 +158,8 @@ function initMenuBar () {
     },
     { label: 'Help', role: 'help', click: () => shell.openExternal('https://github.com/reply2future/dmonitor/issues') },
     { type: 'separator' },
-    { label: 'Quit', role: 'quit' }
+    { label: 'Quit', role: 'quit' },
+    { type: 'separator' }
   ]
 
   menuTray.setToolTip('dmonitor!')
