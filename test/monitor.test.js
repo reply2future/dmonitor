@@ -5,7 +5,7 @@ const proxyquire = require('proxyquire')
 
 const cpus = [110, 120, 130, 50, 112, 130, 0, 0, 10]
 let i = 0
-const { Monitor, Statistics, CheckTimer, CHANGED_TYPES } = proxyquire('../monitor', {
+const { Monitor, Statistics, CheckTimer, ACTION_EVENT, STATUS_EVENT } = proxyquire('../monitor', {
   pidtree: async () => [1],
   '@reply2future/pidusage': async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
 })
@@ -22,19 +22,12 @@ describe('monitor module', () => {
     it('should monitor successfully', async () => {
       let addCbCount = 0
       let removeCbCount = 0
-      const monitor = new Monitor({
-        changedCallback: ({ pid, stat, type }) => {
-          switch (type) {
-            case CHANGED_TYPES.ADD:
-              addCbCount += 1
-              break
-            case CHANGED_TYPES.REMOVE:
-              removeCbCount += 1
-              break
-            default:
-              break
-          }
-        }
+      const monitor = new Monitor()
+      monitor.on(ACTION_EVENT.ADD, ({ pid, stat, type }) => {
+        addCbCount += 1
+      })
+      monitor.on(ACTION_EVENT.REMOVE, ({ pid, stat, type }) => {
+        removeCbCount += 1
       })
       monitor.stats.windowSize = 2
 
@@ -49,6 +42,25 @@ describe('monitor module', () => {
       removeCbCount.should.equal(1)
       await monitor.stop()
       monitor.isRunning().should.equal(false)
+    })
+
+    it('should emit the event when starting', (done) => {
+      const monitor = new Monitor()
+      let invokeStarted = false
+      let invokeStopped = false
+      monitor.on(STATUS_EVENT.START, () => {
+        invokeStarted = true
+      })
+      monitor.on(STATUS_EVENT.STOP, () => {
+        invokeStopped = true
+      })
+      monitor.start()
+      monitor.stop()
+      process.nextTick(() => {
+        invokeStarted.should.equal(true)
+        invokeStopped.should.equal(true)
+        done()
+      })
     })
   })
 
