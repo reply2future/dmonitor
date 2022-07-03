@@ -1,34 +1,39 @@
 const pidtree = require('pidtree')
 const pidusage = require('@reply2future/pidusage')
+const { EventEmitter } = require('events')
 
 const ALL_PROCESSES = -1
 const DEFAULT_INTERVAL_MS = 1000
 const DEFAULT_THRESHOLD = 100
 const DEFAULT_WINDOW_SIZE = 60
 
-const CHANGED_TYPES = {
+const ACTION_EVENT = {
   ADD: 'add',
   REMOVE: 'remove'
 }
 
-class Monitor {
-  constructor ({ intervalMs = DEFAULT_INTERVAL_MS, windowSize = DEFAULT_WINDOW_SIZE, changedCallback }) {
+const STATUS_EVENT = {
+  START: 'start',
+  STOP: 'stop'
+}
+
+class Monitor extends EventEmitter {
+  constructor ({ intervalMs = DEFAULT_INTERVAL_MS, windowSize = DEFAULT_WINDOW_SIZE } = {}) {
+    super()
     this.intervalMs = intervalMs
     this.running = false
-    this.changedCallback = changedCallback
     this.overThresholdPidCache = new Map()
     this.windowSize = windowSize
     this.stats = new Statistics({
       windowSize,
       slidingCallback: ({ pid, stat }) => {
-        if (typeof this.changedCallback !== 'function') return
         const median = this.getMedian(stat.data)
 
         const ret = { pid, stat, type: null }
         if (median < DEFAULT_THRESHOLD) {
           if (!this.overThresholdPidCache.has(pid)) return
 
-          ret.type = CHANGED_TYPES.REMOVE
+          ret.type = ACTION_EVENT.REMOVE
           this.overThresholdPidCache.delete(pid)
         } else {
           if (this.overThresholdPidCache.has(pid)) {
@@ -36,18 +41,18 @@ class Monitor {
             return
           }
 
-          ret.type = CHANGED_TYPES.ADD
+          ret.type = ACTION_EVENT.ADD
           this.overThresholdPidCache.set(pid, Date.now())
         }
 
-        this.changedCallback(ret)
+        this.emit(ret.type, ret)
       }
     })
     this.checkTimer = new CheckTimer({
       intervalMs: this.windowSize * this.intervalMs,
       cache: this.overThresholdPidCache,
       cb: ({ pid }) => {
-        this.changedCallback({ pid, type: CHANGED_TYPES.REMOVE })
+        this.emit(ACTION_EVENT.REMOVE, { pid, type: ACTION_EVENT.REMOVE })
       }
     })
   }
@@ -55,6 +60,7 @@ class Monitor {
   start () {
     if (this.running) return
     this.running = true
+    this.emit(STATUS_EVENT.START)
     const interval = async (time) => {
       setTimeout(async () => {
         if (!this.running) return
@@ -76,6 +82,7 @@ class Monitor {
 
   async stop () {
     this.running = false
+    this.emit(STATUS_EVENT.STOP)
     this.checkTimer.stop()
   }
 
@@ -144,4 +151,4 @@ class CheckTimer {
   }
 }
 
-module.exports = { Monitor, Statistics, CheckTimer, CHANGED_TYPES }
+module.exports = { Monitor, Statistics, CheckTimer, ACTION_EVENT, STATUS_EVENT }

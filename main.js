@@ -1,14 +1,24 @@
 const path = require('path')
-const { Monitor, CHANGED_TYPES } = require('./monitor')
+const { Monitor, ACTION_EVENT, STATUS_EVENT } = require('./monitor')
 const { app, Menu, Notification, Tray, nativeImage, BrowserWindow, ipcMain, shell } = require('electron')
 const { isDev, getIpcStoreKey } = require('./tool')
 const { store, STORE_KEY } = require('./store')
 const logger = require('electron-log')
 
 const monitorConfig = isDev() ? { windowSize: 5 } : {}
+const monitor = new Monitor(monitorConfig)
 
-const changedActions = {}
-changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
+monitor.on(ACTION_EVENT.REMOVE, ({ pid }) => {
+  logger.warn(`pid: ${pid} becomes normal`)
+  const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
+  cachedMenus = cachedMenus.filter(item => item.id !== pid)
+  const hasPid = cachedMenus.some(item => item.isPid)
+  if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
+
+  menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
+})
+
+monitor.on(ACTION_EVENT.ADD, ({ pid, stat }) => {
   const command = path.basename(stat.command)
   logger.warn(`pid: ${pid}, command: ${stat.command} drains the battery fast`)
   new Notification({ title: 'ooops', body: `The command "${command}" is draining the battery fast and pid is ${pid}` }).show()
@@ -29,39 +39,23 @@ changedActions[CHANGED_TYPES.ADD] = ({ pid, stat }) => {
       cachedMenus = cachedMenus.filter(item => item.id !== pid)
       const hasPid = cachedMenus.some(item => item.isPid)
       if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
-      updateStatusItem()
       menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
     }
   })
-  updateStatusItem()
   menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
-}
-
-changedActions[CHANGED_TYPES.REMOVE] = ({ pid }) => {
-  logger.warn(`pid: ${pid} becomes normal`)
-  const statusItem = cachedMenus.find(item => item.id === STATUS_ID)
-  cachedMenus = cachedMenus.filter(item => item.id !== pid)
-  const hasPid = cachedMenus.some(item => item.isPid)
-  if (!hasPid) statusItem.label = STATUS_NO_PID_LABEL
-
-  updateStatusItem()
-  menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
-}
-
-const monitor = new Monitor({
-  ...monitorConfig,
-  changedCallback: ({ pid, stat, type }) => {
-    const fn = changedActions[type]
-    if (fn == null) return logger.warn(`type: ${type} action is not found`)
-
-    fn({ pid, stat })
-  }
 })
 
-function updateStatusItem () {
+Object.entries(STATUS_EVENT).forEach(([_, value]) => {
+  monitor.on(value, () => {
+    updateStatusItem(value)
+  })
+})
+
+function updateStatusItem (value) {
+  const isRunning = value === STATUS_EVENT.START
   const radios = cachedMenus.filter(item => item.type === 'radio')
   radios.forEach(item => {
-    if ((monitor.isRunning() && item.id === ON_ID) || (!monitor.isRunning() && item.id === OFF_ID)) {
+    if ((isRunning && item.id === ON_ID) || (!isRunning && item.id === OFF_ID)) {
       item.checked = true
     } else {
       delete item.checked
@@ -151,7 +145,6 @@ function initMenuBar () {
         win.on('close', () => {
           const silentItem = cachedMenus.find(item => item.id === SILENT_ID)
           silentItem.label = generateSilentTimeLabel()
-          updateStatusItem()
           menuTray.setContextMenu(Menu.buildFromTemplate(cachedMenus))
         })
       }
