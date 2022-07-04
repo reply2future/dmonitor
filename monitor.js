@@ -61,7 +61,7 @@ class Monitor extends EventEmitter {
     if (this.running) return
     this.running = true
     this.emit(STATUS_EVENT.START)
-    const interval = async (time) => {
+    const interval = async () => {
       setTimeout(async () => {
         if (!this.running) return
 
@@ -72,11 +72,11 @@ class Monitor extends EventEmitter {
           this.stats.addPidStat(pid, stat)
         }
 
-        interval(time)
-      }, time)
+        interval()
+      }, this.intervalMs)
     }
 
-    interval(this.intervalMs)
+    interval()
     this.checkTimer.start()
   }
 
@@ -95,6 +95,11 @@ class Monitor extends EventEmitter {
     const mid = Math.floor(dLen / 2)
     const nums = [...data].sort((a, b) => a.cpu - b.cpu)
     return dLen % 2 !== 0 ? nums[mid].cpu : (nums[mid - 1].cpu + nums[mid].cpu) / 2
+  }
+
+  setInterval (intervalMs) {
+    this.intervalMs = intervalMs
+    this.checkTimer.setInterval(intervalMs * this.windowSize)
   }
 }
 
@@ -148,6 +153,10 @@ class CheckTimer {
 
   stop () {
     clearInterval(this.interval)
+  }
+
+  setInterval (interval) {
+    this.intervalMs = interval
   }
 }
 
