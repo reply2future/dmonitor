@@ -3,6 +3,7 @@ const store = new Store()
 
 const STORE_KEY = {
   silentTimeHr: 'silentTimeHr',
+  intervalTimeSd: 'intervalTimeSd',
   autoLaunch: 'autoLaunch',
   appInfo: 'appInfo'
 }

@@ -6,7 +6,7 @@ const { store, STORE_KEY } = require('./store')
 const { MenuTray, MENU_CLICK_EVENT } = require('./menu')
 const logger = require('electron-log')
 
-const monitorConfig = isDev() ? { windowSize: 5 } : {}
+const monitorConfig = isDev() ? { windowSize: 5, intervalMs: 1000 } : { intervalMs: store.get(STORE_KEY.intervalTimeSd, 1000) }
 const monitor = new Monitor(monitorConfig)
 
 monitor.on(ACTION_EVENT.REMOVE, ({ pid }) => {
@@ -48,6 +48,10 @@ function initListeners () {
     app.setLoginItemSettings({
       openAtLogin: value
     })
+  })
+
+  ipcMain.on(getIpcStoreKey(STORE_KEY.intervalTimeSd), (event, intervalMs) => {
+    monitor.setInterval(intervalMs)
   })
 }
 

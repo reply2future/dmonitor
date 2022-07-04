@@ -14,10 +14,12 @@ describe('monitor module', () => {
   describe('monitor', () => {
     let clock
     beforeEach(() => {
+      i = 0
       clock = sinon.useFakeTimers()
     })
     afterEach(() => {
       clock.restore()
+      i = 0
     })
     it('should monitor successfully', async () => {
       let addCbCount = 0
@@ -61,6 +63,32 @@ describe('monitor module', () => {
         invokeStopped.should.equal(true)
         done()
       })
+    })
+
+    it('should setInterval successfully', async () => {
+      let addCbCount = 0
+      let removeCbCount = 0
+      const monitor = new Monitor()
+      monitor.on(ACTION_EVENT.ADD, ({ pid, stat, type }) => {
+        addCbCount += 1
+      })
+      monitor.on(ACTION_EVENT.REMOVE, ({ pid, stat, type }) => {
+        removeCbCount += 1
+      })
+      monitor.stats.windowSize = 2
+
+      monitor.setInterval(4000)
+      monitor.start()
+
+      monitor.isRunning().should.equal(true)
+      await clock.tickAsync(3000)
+      addCbCount.should.equal(0)
+      removeCbCount.should.equal(0)
+      await clock.tickAsync(5000)
+      addCbCount.should.equal(1)
+      removeCbCount.should.equal(0)
+      await monitor.stop()
+      monitor.isRunning().should.equal(false)
     })
   })
 
