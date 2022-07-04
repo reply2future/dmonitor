@@ -9,8 +9,13 @@
 
   <div>
     <label for="silent-time">Silent time(between 1h to 6h):</label>
-    <input type="range" id="silent-time" name="silent-time" value="1" min="1" max="6" step="1" oninput="this.nextElementSibling.value = `${this.value}h`">
-    <output>1h</output>
+    <input type="range" id="silent-time" name="silent-time" value="1" min="1" max="6" step="1" oninput="this.nextElementSibling.value = `${this.value} hour`">
+    <output>1 hour</output>
+  </div>
+  <div>
+    <label for="interval-time">Interval time(between 1s to 10s):</label>
+    <input type="range" id="interval-time" name="interval-time" value="1" min="1" max="10" step="1" oninput="this.nextElementSibling.value = `${this.value} second`">
+    <output>1 second</output>
   </div>
   <div>
     <label for="auto-launch">Run on system startup</label>
