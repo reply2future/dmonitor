@@ -11,7 +11,8 @@
     "coverage": "nyc --reporter=lcov npm test",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "commit": "cz"
   },
   "standard": {
     "env": [
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.6",
+    "cz-conventional-changelog": "^3.3.0",
     "electron": "^19.0.1",
     "electron-builder": "^23.0.3",
     "mocha": "^10.0.0",
@@ -58,5 +60,10 @@
     "electron-log": "^4.4.7",
     "electron-store": "^8.0.2",
     "pidtree": "^0.5.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
