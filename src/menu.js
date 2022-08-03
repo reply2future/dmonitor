@@ -79,7 +79,7 @@ class MenuTray extends EventEmitter {
               preload: path.join(__dirname, 'preload.js')
             }
           })
-          win.loadFile('preference.html')
+          win.loadFile(path.join(__dirname, 'preference.html'))
           win.on('close', () => {
             const silentItem = this.items.find(item => item.id === SILENT_ID)
             silentItem.label = this.generateSilentTimeLabel()

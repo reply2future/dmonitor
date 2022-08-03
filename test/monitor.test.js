@@ -5,7 +5,7 @@ const proxyquire = require('proxyquire')
 
 const cpus = [110, 120, 130, 50, 112, 130, 0, 0, 10]
 let i = 0
-const { Monitor, Statistics, CheckTimer, ACTION_EVENT, STATUS_EVENT } = proxyquire('../monitor', {
+const { Monitor, Statistics, CheckTimer, ACTION_EVENT, STATUS_EVENT } = proxyquire('../src/monitor', {
   pidtree: async () => [1],
   '@reply2future/pidusage': async () => ({ 1: { cpu: cpus[i++ % cpus.length], ppid: 1 } })
 })
