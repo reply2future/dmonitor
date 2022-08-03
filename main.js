@@ -1,9 +1,9 @@
 const path = require('path')
-const { Monitor, ACTION_EVENT } = require('./monitor')
+const { Monitor, ACTION_EVENT } = require('./src/monitor')
 const { app, Notification, nativeImage, ipcMain } = require('electron')
-const { isDev, getIpcStoreKey } = require('./tool')
-const { store, STORE_KEY } = require('./store')
-const { MenuTray, MENU_CLICK_EVENT } = require('./menu')
+const { isDev, getIpcStoreKey } = require('./src/tool')
+const { store, STORE_KEY } = require('./src/store')
+const { MenuTray, MENU_CLICK_EVENT } = require('./src/menu')
 const logger = require('electron-log')
 
 const monitorConfig = isDev() ? { windowSize: 5, intervalMs: 1000 } : { intervalMs: store.get(STORE_KEY.intervalTimeSd, 1000) }
