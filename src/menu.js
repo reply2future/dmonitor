@@ -32,6 +32,7 @@ class MenuTray extends EventEmitter {
         label: '    on',
         id: ON_ID,
         accelerator: 'CmdOrCtrl+S',
+        checked: true,
         type: 'radio',
         click: () => {
           clearTimeout(this.silentTimeoutId)
@@ -43,7 +44,6 @@ class MenuTray extends EventEmitter {
         label: '    off',
         id: OFF_ID,
         type: 'radio',
-        checked: true,
         accelerator: 'CmdOrCtrl+P',
         click: () => {
           clearTimeout(this.silentTimeoutId)

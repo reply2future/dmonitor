@@ -47,6 +47,7 @@ The monitor will collect the cpu usage information, if the median of cpu usage i
 
 1. [electron.js](https://www.electronjs.org/)
 2. node.js >= 16
+3. [nvm](https://github.com/nvm-sh/nvm) to manager node version
 
 ## Contribute
 

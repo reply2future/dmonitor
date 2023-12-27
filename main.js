@@ -55,6 +55,10 @@ function initListeners () {
   })
 }
 
+function startMonitor() {
+  monitor.start()
+}
+
 // This method will be called when Electron has done everything
 // initialization and ready for creating menu bar.
 app.whenReady()
@@ -64,6 +68,7 @@ app.whenReady()
   })
   .then(initListeners)
   .then(initMenuBar)
+  .then(startMonitor)
   .then(() => {
     logger.info('initialized')
   })
