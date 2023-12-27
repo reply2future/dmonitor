@@ -55,7 +55,7 @@ function initListeners () {
   })
 }
 
-function startMonitor() {
+function startMonitor () {
   monitor.start()
 }
 
